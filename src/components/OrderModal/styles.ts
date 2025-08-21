@@ -137,4 +137,9 @@ export const Actions = styled.footer`
     background-color: transparent;
     margin-top: 12px;
   }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
