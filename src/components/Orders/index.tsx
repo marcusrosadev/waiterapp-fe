@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import socketIo from 'socket.io-client';
+
 import { OrdersBoard } from "../OrdersBoard";
 import { Container} from "./styles";
 import type { Order } from "../../types/Order";
@@ -6,6 +8,31 @@ import { api } from "../../utils/api";
 
 export function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const socket = socketIo('http://localhost:3001', {
+      transports: ['websocket'],
+    })
+
+    socket.on('orders@new', (order) => {
+      setOrders((prevState) => {
+        const orderAlreadyExists = prevState.some(
+          (prevOrder) => prevOrder._id === order._id
+        );
+
+        if (orderAlreadyExists) {
+          return prevState;
+        }
+
+        return prevState.concat(order);
+      });
+    })
+
+    return () => {
+      socket.off('orders@new');
+      socket.disconnect();
+    };
+  }, [])
 
   useEffect(() => {
     api.get('/orders')
